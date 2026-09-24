@@ -2,11 +2,39 @@ import {Entrega} from "../database/Entrega";
 import {StatusEnum} from "../database/StatusEnum";
 import {IEntregaRepository} from "../interfaces/IEntregaRepository";
 import {Evento} from "../database/Evento";
+import {EntregaDTO} from "../dto/EntregaDTO";
+import {IEntrega} from "../interfaces/IEntrega";
 
 
 export class EntregaService {
-
     constructor(private repository: IEntregaRepository) {}
+
+
+    novaEntrega(dados: {descricao: string, origem: string, destino: string }){
+        const dto = EntregaDTO.porObjeto(dados);
+        if(dto.origem === dto.destino){
+            return undefined;
+        }
+        const novaEntrega = this.repository.criar(dto.paraEntrega());
+        this.novoEvento(novaEntrega);
+        return novaEntrega;
+    }
+
+    listarEntregas() : IEntrega[] {
+        return this.repository.listarEntregas();
+    }
+
+    porId(idEntrega: number): IEntrega | undefined {
+        return this.repository.porId(idEntrega);
+    }
+
+    porStatus(status: StatusEnum) : IEntrega[] {
+        return this.repository.porStatus(status);
+    }
+
+    buscaHistorico(idEntrega: number): Evento[] | undefined {
+        return this.repository.historico(idEntrega);
+    }
 
     avancarEntrega(idEntrega: number): Entrega | undefined {
         const entrega = this.repository.porId(idEntrega);
@@ -73,7 +101,4 @@ export class EntregaService {
         });
         this.repository.novoRegistroHistorico(entrega, evento);
     }
-
-
-
 }

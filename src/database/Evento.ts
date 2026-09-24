@@ -1,6 +1,9 @@
-import {IEvento} from "../interfaces/IEvento";
+interface IEvento {
+    data: string;
+    descricao: string;
+}
 
-export class Evento implements IEvento{
+export class Evento{
     data: string;
     descricao: string;
 
