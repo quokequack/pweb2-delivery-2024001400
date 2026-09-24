@@ -1,7 +1,7 @@
-import {Entrega} from "../database/Entrega";
-import {StatusEnum} from "../database/StatusEnum";
-import {IEntrega} from "./IEntrega";
-import {Evento} from "../database/Evento";
+import {Entrega} from "../database/Entrega.js";
+import {StatusEnum} from "../database/StatusEnum.js";
+import {IEntrega} from "./IEntrega.js";
+import {Evento} from "../database/Evento.js";
 
 
 export interface IEntregaRepository {

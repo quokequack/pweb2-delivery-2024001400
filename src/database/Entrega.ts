@@ -1,6 +1,6 @@
-import {IEntrega} from "../interfaces/IEntrega";
-import {StatusEnum} from "./StatusEnum";
-import {Evento} from "./Evento";
+import {IEntrega} from "../interfaces/IEntrega.js";
+import {StatusEnum} from "./StatusEnum.js";
+import {Evento} from "./Evento.js";
 
 
 export class Entrega implements IEntrega {

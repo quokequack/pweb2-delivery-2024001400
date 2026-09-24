@@ -1,5 +1,5 @@
-import {StatusEnum} from "../database/StatusEnum";
-import {Evento} from "../database/Evento";
+import {StatusEnum} from "../database/StatusEnum.js";
+import {Evento} from "../database/Evento.js";
 
 
 export interface IEntrega {

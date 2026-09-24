@@ -1,9 +1,9 @@
-import {IEntregaRepository} from "../interfaces/IEntregaRepository";
-import {Database} from "../database/Database";
-import {Entrega} from "../database/Entrega";
-import {IEntrega} from "../interfaces/IEntrega";
-import {Evento} from "../database/Evento";
-import {StatusEnum} from "../database/StatusEnum";
+import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
+import {Database} from "../database/Database.js";
+import {Entrega} from "../database/Entrega.js";
+import {IEntrega} from "../interfaces/IEntrega.js";
+import {Evento} from "../database/Evento.js";
+import {StatusEnum} from "../database/StatusEnum.js";
 
 export class EntregaRepository implements IEntregaRepository {
 

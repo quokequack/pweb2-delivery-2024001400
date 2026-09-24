@@ -1,9 +1,10 @@
-import {Entrega} from "../database/Entrega";
-import {StatusEnum} from "../database/StatusEnum";
-import {IEntregaRepository} from "../interfaces/IEntregaRepository";
-import {Evento} from "../database/Evento";
-import {EntregaDTO} from "../dto/EntregaDTO";
-import {IEntrega} from "../interfaces/IEntrega";
+import {Entrega} from "../database/Entrega.js";
+import {StatusEnum} from "../database/StatusEnum.js";
+import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
+import {Evento} from "../database/Evento.js";
+import {EntregaDTO} from "../dto/EntregaDTO.js";
+import {IEntrega} from "../interfaces/IEntrega.js";
+import {EntregaError} from "../errors/EntregaError.js";
 
 
 export class EntregaService {
@@ -11,10 +12,26 @@ export class EntregaService {
 
 
     novaEntrega(dados: {descricao: string, origem: string, destino: string }){
-        const dto = EntregaDTO.porObjeto(dados);
-        if(dto.origem === dto.destino){
-            return undefined;
+        if (!dados || !dados.descricao?.trim() || !dados.origem?.trim() || !dados.destino?.trim()) {
+            throw new EntregaError(400, "Descrição, origem e destino são obrigatórios");
         }
+
+        const dto = EntregaDTO.porObjeto(dados);
+        if(dto.origem.trim() === dto.destino.trim()){
+            throw new EntregaError(400, "Origem e destino não podem ser iguais");
+        }
+
+        const existeDuplicataAtiva = this.repository.listarEntregas().some((entrega) =>
+            (entrega.status === StatusEnum.CRIADA || entrega.status === StatusEnum.EM_TRANSITO) &&
+            entrega.descricao === dto.descricao &&
+            entrega.origem === dto.origem &&
+            entrega.destino === dto.destino,
+        );
+
+        if (existeDuplicataAtiva) {
+            throw new EntregaError(409, "Já existe uma entrega ativa com os mesmos dados");
+        }
+
         const novaEntrega = this.repository.criar(dto.paraEntrega());
         this.novoEvento(novaEntrega);
         return novaEntrega;
@@ -41,13 +58,15 @@ export class EntregaService {
         if(!this.entregaExiste(entrega)){
             return undefined;
         }
+
         switch (entrega.status) {
             case StatusEnum.CRIADA:
-                return this.atualizar(entrega, StatusEnum.EM_TRANSITO)
+                return this.atualizar(entrega, StatusEnum.EM_TRANSITO);
             case StatusEnum.EM_TRANSITO:
-                return this.atualizar(entrega, StatusEnum.ENTREGUE)
+                return this.atualizar(entrega, StatusEnum.ENTREGUE);
+            default:
+                throw new EntregaError(422, "A entrega não pode mais avançar");
         }
-
     }
 
     cancelarEntrega(idEntrega: number): Entrega | undefined {
@@ -62,7 +81,7 @@ export class EntregaService {
 
     private atualizar(entrega: Entrega, status: StatusEnum): Entrega | undefined {
         if(!this.validaStatus(entrega, status)){
-            return undefined;
+            throw new EntregaError(422, "Transição de status inválida");
         }
 
         const entregaAtualizada = this.repository.atualizar(entrega, {
@@ -80,18 +99,13 @@ export class EntregaService {
     }
 
     private validaStatus(entrega: Entrega, novoStatus: StatusEnum){
-        if(entrega.status === novoStatus) {
-            return false;
+        if (novoStatus === StatusEnum.CANCELADA) {
+            return entrega.status === StatusEnum.CRIADA ||
+                entrega.status === StatusEnum.EM_TRANSITO;
         }
 
-        if(entrega.status === StatusEnum.CANCELADA) {
-            return false;
-        }
-
-        if(entrega.status === StatusEnum.ENTREGUE) {
-            return false;
-        }
-        return true;
+        return (entrega.status === StatusEnum.CRIADA && novoStatus === StatusEnum.EM_TRANSITO) ||
+            (entrega.status === StatusEnum.EM_TRANSITO && novoStatus === StatusEnum.ENTREGUE);
     }
 
     private novoEvento(entrega: Entrega) : void {

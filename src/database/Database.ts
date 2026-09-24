@@ -1,4 +1,4 @@
-import {Entrega} from "./Entrega";
+import {Entrega} from "./Entrega.js";
 
 export class Database {
     entregas: Entrega[] = [];
