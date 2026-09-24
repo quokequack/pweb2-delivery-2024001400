@@ -3,3 +3,5 @@ npm-debug.log*
 .env
 *.db
 .DS_Store
+dist/
+.idea/
