@@ -20,6 +20,7 @@ export class Entrega implements IEntrega {
         this.status = dados.status;
         this.motoristaId = dados.motoristaId;
         this.historico = dados.historico;
-    }
 
+        this.historico.push(new Evento({data: new Date().toISOString(), descricao: dados.status}))
+    }
 }

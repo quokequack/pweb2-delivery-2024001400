@@ -1,15 +1,27 @@
 import {Entrega} from "../database/Entrega.js";
-import {StatusEnum} from "../database/StatusEnum.js";
 import {IEntrega} from "./IEntrega.js";
-import {Evento} from "../database/Evento.js";
+import {IFiltrosEntrega} from "../repositories/EntregaRepository.js";
 
 
 export interface IEntregaRepository {
-    listarEntregas(): Entrega[];
-    porId(idEntrega: number): Entrega | undefined;
-    porStatus(status: StatusEnum) : Entrega[];
+
+    /**
+     * Lista todas as entregas, podendo aplicar filtros opcionais
+     */
+    listarTodos(filtros?: IFiltrosEntrega) : Entrega[];
+
+    /**
+     * Busca a entrega que possui esse id
+     */
+    buscarPorId(idEntrega: number): Entrega | null;
+
+    /**
+     * Cria uma nova entrega
+     */
     criar(dadosEntrega: IEntrega): Entrega;
-    atualizar(entrega: Entrega, dados: Partial<IEntrega>): Entrega;
-    historico(idEntrega: number): Evento[] | undefined;
-    novoRegistroHistorico(entrega: Entrega, evento: Evento) : void;
+
+    /**
+     * Atualiza uma entrega com base em seu id
+     */
+    atualizar(idEntrega: number, dados: Partial<IEntrega>): Entrega;
 }

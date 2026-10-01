@@ -9,4 +9,5 @@ export interface IEntrega {
     status: StatusEnum,
     motoristaId?: number
     historico: Evento[]
+
 }

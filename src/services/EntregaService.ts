@@ -11,7 +11,7 @@ export class EntregaService {
     constructor(private repository: IEntregaRepository) {}
 
 
-    novaEntrega(dados: {descricao: string, origem: string, destino: string }){
+    novaEntrega(dados: {descricao: string, origem: string, destino: string, historico: Evento[]}){
         if (!dados || !dados.descricao?.trim() || !dados.origem?.trim() || !dados.destino?.trim()) {
             throw new EntregaError(400, "Descrição, origem e destino são obrigatórios");
         }
@@ -21,7 +21,7 @@ export class EntregaService {
             throw new EntregaError(400, "Origem e destino não podem ser iguais");
         }
 
-        const existeDuplicataAtiva = this.repository.listarEntregas().some((entrega) =>
+        const existeDuplicataAtiva = this.repository.listarTodos().some((entrega) =>
             (entrega.status === StatusEnum.CRIADA || entrega.status === StatusEnum.EM_TRANSITO) &&
             entrega.descricao === dto.descricao &&
             entrega.origem === dto.origem &&
@@ -33,72 +33,65 @@ export class EntregaService {
         }
 
         const novaEntrega = this.repository.criar(dto.paraEntrega());
-        this.novoEvento(novaEntrega);
         return novaEntrega;
     }
 
     listarEntregas() : IEntrega[] {
-        return this.repository.listarEntregas();
+        return this.repository.listarTodos();
     }
 
-    porId(idEntrega: number): IEntrega | undefined {
-        return this.repository.porId(idEntrega);
+    porId(idEntrega: number): IEntrega {
+        const entrega = this.repository.buscarPorId(idEntrega);
+        if(!entrega){
+            throw new EntregaError(404, "Entrega não encontrada!");
+        }
+        return entrega;
     }
 
-    porStatus(status: StatusEnum) : IEntrega[] {
-        return this.repository.porStatus(status);
+    porStatus(statusBusca: StatusEnum) : Entrega[] {
+        return this.repository.listarTodos({status: statusBusca});
     }
 
-    buscaHistorico(idEntrega: number): Evento[] | undefined {
-        return this.repository.historico(idEntrega);
+    buscaHistorico(idEntrega: number): Evento[] {
+        const entrega = this.porId(idEntrega);
+        return entrega.historico ?? [];
+
     }
 
     avancarEntrega(idEntrega: number): Entrega | undefined {
-        const entrega = this.repository.porId(idEntrega);
-        if(!this.entregaExiste(entrega)){
-            return undefined;
-        }
+        const entrega = this.porId(idEntrega);
 
         switch (entrega.status) {
             case StatusEnum.CRIADA:
-                return this.atualizar(entrega, StatusEnum.EM_TRANSITO);
+                return this.atualizar(idEntrega, {status: StatusEnum.EM_TRANSITO});
             case StatusEnum.EM_TRANSITO:
-                return this.atualizar(entrega, StatusEnum.ENTREGUE);
+                return this.atualizar(idEntrega, {status: StatusEnum.ENTREGUE});
             default:
                 throw new EntregaError(422, "A entrega não pode mais avançar");
         }
     }
 
-    cancelarEntrega(idEntrega: number): Entrega | undefined {
-        const entrega = this.repository.porId(idEntrega);
-        if(!this.entregaExiste(entrega)){
-            return undefined;
-        }
-
-        return this.atualizar(entrega, StatusEnum.CANCELADA);
-
+    cancelarEntrega(idEntrega: number): Entrega {
+        return this.atualizar(idEntrega, {status: StatusEnum.CANCELADA});
     }
 
-    private atualizar(entrega: Entrega, status: StatusEnum): Entrega | undefined {
-        if(!this.validaStatus(entrega, status)){
-            throw new EntregaError(422, "Transição de status inválida");
-        }
+    private atualizar(idEntrega: number, dados: Partial<IEntrega>): Entrega {
+        const entrega = this.porId(idEntrega);
+        if(dados.status){
+            if(!this.validaStatus(idEntrega, dados.status)){
+                throw new EntregaError(422, "Transição de status inválida");
+            }
+            const evento = this.adicionaEvento(dados.status);
 
-        const entregaAtualizada = this.repository.atualizar(entrega, {
-            status: status,
-        });
-        this.novoEvento(entregaAtualizada);
+            dados.historico = [...(entrega.historico ?? []), evento];
+        }
+        const entregaAtualizada = this.repository.atualizar(idEntrega, dados);
         return entregaAtualizada;
     }
 
-    private entregaExiste(entrega: Entrega | undefined) : entrega is Entrega {
-        if(!entrega) {
-            return false;
-        }
-        return true;
-    }
+    private validaStatus(idEntrega: number, novoStatus: StatusEnum){
+        const entrega = this.porId(idEntrega);
 
-    private validaStatus(entrega: Entrega, novoStatus: StatusEnum){
         if (novoStatus === StatusEnum.CANCELADA) {
             return entrega.status === StatusEnum.CRIADA ||
                 entrega.status === StatusEnum.EM_TRANSITO;
@@ -108,11 +101,10 @@ export class EntregaService {
             (entrega.status === StatusEnum.EM_TRANSITO && novoStatus === StatusEnum.ENTREGUE);
     }
 
-    private novoEvento(entrega: Entrega) : void {
-        const evento = new Evento({
+    private adicionaEvento(novoStatus: StatusEnum) : Evento {
+        return new Evento({
             data: new Date().toISOString(),
-            descricao: entrega.status,
-        });
-        this.repository.novoRegistroHistorico(entrega, evento);
+            descricao: novoStatus
+        })
     }
 }
