@@ -32,8 +32,7 @@ export class EntregaService {
             throw new EntregaError(409, "Já existe uma entrega ativa com os mesmos dados");
         }
 
-        const novaEntrega = this.repository.criar(dto.paraEntrega());
-        return novaEntrega;
+        return this.repository.criar(dto.paraEntrega());
     }
 
     listarEntregas() : IEntrega[] {

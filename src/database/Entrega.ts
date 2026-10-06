@@ -9,7 +9,7 @@ export class Entrega implements IEntrega {
     origem: string;
     destino: string;
     status: StatusEnum;
-    motoristaId?: number;
+    motoristaId: number | null;
     historico: Evento[];
 
     constructor(id: number, dados: IEntrega) {

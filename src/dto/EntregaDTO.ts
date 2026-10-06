@@ -2,8 +2,7 @@ import {Evento} from "../database/Evento.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
 import {StatusEnum} from "../database/StatusEnum.js";
 
-export class EntregaDTO {
-    id: number | null;
+export class EntregaDTO implements IEntrega {
     descricao: string;
     origem: string;
     destino: string;
@@ -12,7 +11,6 @@ export class EntregaDTO {
     historico: Evento[];
 
     constructor(descricao: string, origem: string, destino: string) {
-        this.id = null;
         this.descricao = descricao;
         this.origem = origem;
         this.destino = destino;
@@ -31,6 +29,7 @@ export class EntregaDTO {
             origem: this.origem,
             destino: this.destino,
             status: this.status,
+            motoristaId: this.motoristaId,
             historico: this.historico,
         }
     }
