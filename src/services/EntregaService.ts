@@ -76,7 +76,7 @@ export class EntregaService {
         return this.atualizar(idEntrega, {status: StatusEnum.CANCELADA});
     }
 
-    atribuirMotorista(idEntrega: number, idMotorista: number) : void {
+    atribuirMotorista(idEntrega: number, idMotorista: number) : Entrega {
         const motorista = this.motoristaRepository.buscarPorId(idMotorista);
         const entrega = this.repository.buscarPorId(idEntrega);
 
@@ -94,8 +94,9 @@ export class EntregaService {
         if(entrega.status !== StatusEnum.CRIADA){
             throw new EntregaError(422, "Entrega com status inválido!");
         }
+        const evento = new Evento({data: new Date().toISOString(), descricao: `Motorista ${motorista.nome} atribuído!`})
 
-        this.atualizar(idEntrega, {motoristaId: idMotorista})
+        return this.repository.atualizar(idEntrega, {motoristaId: idMotorista, historico: [...(entrega.historico ?? []), evento]})
 
     }
 

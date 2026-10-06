@@ -112,8 +112,8 @@ export class EntregaController {
             const idEntrega = req.params.id as unknown as number;
             const idMotorista = req.body.motoristaId as unknown as number;
 
-            this.service.atribuirMotorista(idEntrega, idMotorista);
-            res.status(200).json(idMotorista);
+            const entrega = this.service.atribuirMotorista(idEntrega, idMotorista);
+            res.status(200).json(entrega);
         } catch(error){
             return this.responderErro(res, error);
         }
