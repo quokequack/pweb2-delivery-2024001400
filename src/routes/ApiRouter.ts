@@ -16,11 +16,12 @@ export class ApiRouter {
         this.router = Router();
         const database = new Database();
         const repository = new EntregaRepository(database);
-        const service = new EntregaService(repository);
+
+        const motoristaRepository = new MotoristaRepository(database);
+        const service = new EntregaService(repository, motoristaRepository);
         const controller = new EntregaController(service);
         const entregaRoutes = new EntregasRoute(controller);
 
-        const motoristaRepository = new MotoristaRepository(database);
         const motoristaService = new MotoristaService(motoristaRepository);
         const motoristaController = new MotoristaController(motoristaService);
         const motoristaRoutes = new MotoristasRoute(motoristaController);

@@ -16,6 +16,8 @@ export class EntregasRoute {
         this.router.patch('/:id/cancelar', this.controller.cancelar);
         this.router.get('/:id/historico', this.controller.buscarHistorico);
         this.router.get('/:id', this.controller.buscarPorId);
+        this.router.patch('/:id/atribuir', this.controller.atribuir);
+
     }
 
     public getRouter() : Router {

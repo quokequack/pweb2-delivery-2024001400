@@ -5,10 +5,12 @@ import {Evento} from "../database/Evento.js";
 import {EntregaDTO} from "../dto/EntregaDTO.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
 import {EntregaError} from "../errors/EntregaError.js";
+import {IMotoristaRepository} from "../interfaces/IMotoristaRepository.js";
+import {StatusMotoristaEnum} from "../database/StatusMotoristaEnum.js";
 
 
 export class EntregaService {
-    constructor(private repository: IEntregaRepository) {}
+    constructor(private repository: IEntregaRepository, private motoristaRepository: IMotoristaRepository) {}
 
 
     novaEntrega(dados: {descricao: string, origem: string, destino: string, historico: Evento[]}){
@@ -72,6 +74,29 @@ export class EntregaService {
 
     cancelarEntrega(idEntrega: number): Entrega {
         return this.atualizar(idEntrega, {status: StatusEnum.CANCELADA});
+    }
+
+    atribuirMotorista(idEntrega: number, idMotorista: number) : void {
+        const motorista = this.motoristaRepository.buscarPorId(idMotorista);
+        const entrega = this.repository.buscarPorId(idEntrega);
+
+        if(!motorista){
+            throw new EntregaError(404, "Motorista não encontrado!");
+        }
+        if(motorista.status === StatusMotoristaEnum.INATIVO){
+            throw new EntregaError(422, "Motorista inativo!");
+        }
+
+        if(!entrega){
+            throw new EntregaError(404, "Entrega não encontrada!")
+        }
+
+        if(entrega.status !== StatusEnum.CRIADA){
+            throw new EntregaError(422, "Entrega com status inválido!");
+        }
+
+        this.atualizar(idEntrega, {motoristaId: idMotorista})
+
     }
 
     private atualizar(idEntrega: number, dados: Partial<IEntrega>): Entrega {

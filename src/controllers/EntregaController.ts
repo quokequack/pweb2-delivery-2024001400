@@ -106,4 +106,16 @@ export class EntregaController {
 
         return res.status(500).json({ erro: "Erro interno do servidor" });
     }
+
+    atribuir = async (req: Request, res: Response) => {
+        try {
+            const idEntrega = req.params.id as unknown as number;
+            const idMotorista = req.body.motoristaId as unknown as number;
+
+            this.service.atribuirMotorista(idEntrega, idMotorista);
+            res.status(200).json(idMotorista);
+        } catch(error){
+            return this.responderErro(res, error);
+        }
+    }
 }

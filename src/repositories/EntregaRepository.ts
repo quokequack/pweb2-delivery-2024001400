@@ -25,7 +25,7 @@ export class EntregaRepository implements IEntregaRepository {
     }
 
     buscarPorId(idEntrega: number): Entrega | null {
-        return this.database.entregas.find((entrega) => entrega.id === idEntrega) ?? null;
+        return this.database.entregas.find((entrega) => entrega.id == idEntrega) ?? null;
     }
 
     criar(dadosEntrega: IEntrega): Entrega {
