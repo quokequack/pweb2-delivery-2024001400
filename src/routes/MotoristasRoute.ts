@@ -11,6 +11,7 @@ export class MotoristasRoute {
 
     private configurarRotas() : void {
         this.router.post('/', this.controller.criar);
+        this.router.get('/:id/entregas', this.controller.entregasPorMotorista);
     }
 
     public getRouter() : Router {

@@ -22,7 +22,7 @@ export class ApiRouter {
         const controller = new EntregaController(service);
         const entregaRoutes = new EntregasRoute(controller);
 
-        const motoristaService = new MotoristaService(motoristaRepository);
+        const motoristaService = new MotoristaService(motoristaRepository, repository);
         const motoristaController = new MotoristaController(motoristaService);
         const motoristaRoutes = new MotoristasRoute(motoristaController);
 

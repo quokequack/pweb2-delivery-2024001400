@@ -54,7 +54,7 @@ export class EntregaRepository implements IEntregaRepository {
                 return false;
             }
 
-            if (filtros.motoristaId !== null && entrega.motoristaId !== filtros.motoristaId) {
+            if (filtros.motoristaId !== null && entrega.motoristaId != filtros.motoristaId) {
                 return false;
             }
             return true;

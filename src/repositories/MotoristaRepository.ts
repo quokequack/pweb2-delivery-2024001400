@@ -11,7 +11,7 @@ export class MotoristaRepository implements IMotoristaRepository {
         return this.database.motoristas;
     }
     buscarPorId(id: number): Motorista | null {
-        return this.database.motoristas.find((motorista) => motorista.id === id) ?? null;
+        return this.database.motoristas.find((motorista) => motorista.id == id) ?? null;
     }
     buscarPorCpf(cpf: string): Motorista | null {
         return this.database.motoristas.find((motorista) => motorista.cpf === cpf) ?? null;
