@@ -4,6 +4,10 @@ import {EntregaRepository} from "../repositories/EntregaRepository.js";
 import {EntregaService} from "../services/EntregaService.js";
 import {EntregaController} from "../controllers/EntregaController.js";
 import {EntregasRoute} from "./EntregasRoute.js";
+import {MotoristaRepository} from "../repositories/MotoristaRepository.js";
+import {MotoristaService} from "../services/MotoristaService.js";
+import {MotoristaController} from "../controllers/MotoristaController.js";
+import {MotoristasRoute} from "./MotoristasRoute.js";
 
 export class ApiRouter {
     private router: Router;
@@ -12,11 +16,19 @@ export class ApiRouter {
         this.router = Router();
         const database = new Database();
         const repository = new EntregaRepository(database);
-        const service = new EntregaService(repository);
+
+        const motoristaRepository = new MotoristaRepository(database);
+        const service = new EntregaService(repository, motoristaRepository);
         const controller = new EntregaController(service);
         const entregaRoutes = new EntregasRoute(controller);
 
+        const motoristaService = new MotoristaService(motoristaRepository, repository);
+        const motoristaController = new MotoristaController(motoristaService);
+        const motoristaRoutes = new MotoristasRoute(motoristaController);
+
+
         this.router.use('/entregas', entregaRoutes.getRouter());
+        this.router.use('/motoristas', motoristaRoutes.getRouter());
     }
 
     getRouter() : Router{

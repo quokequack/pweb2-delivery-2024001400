@@ -9,7 +9,7 @@ export class Entrega implements IEntrega {
     origem: string;
     destino: string;
     status: StatusEnum;
-    motoristaId?: number;
+    motoristaId: number | null;
     historico: Evento[];
 
     constructor(id: number, dados: IEntrega) {
@@ -20,6 +20,7 @@ export class Entrega implements IEntrega {
         this.status = dados.status;
         this.motoristaId = dados.motoristaId;
         this.historico = dados.historico;
-    }
 
+        this.historico.push(new Evento({data: new Date().toISOString(), descricao: dados.status}))
+    }
 }

@@ -7,6 +7,7 @@ export interface IEntrega {
     origem: string,
     destino: string,
     status: StatusEnum,
-    motoristaId?: number
+    motoristaId: number | null,
     historico: Evento[]
+
 }

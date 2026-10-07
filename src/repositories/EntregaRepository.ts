@@ -2,16 +2,30 @@ import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
 import {Database} from "../database/Database.js";
 import {Entrega} from "../database/Entrega.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
-import {Evento} from "../database/Evento.js";
 import {StatusEnum} from "../database/StatusEnum.js";
+
+export interface IFiltrosEntrega {
+    status?: StatusEnum;
+    origem?: string;
+    destino?: string;
+    motoristaId?: number;
+}
 
 export class EntregaRepository implements IEntregaRepository {
 
     constructor(private database: Database) {}
 
-    atualizar(entrega: Entrega, dados: Partial<IEntrega>) : Entrega {
-        Object.assign(entrega, dados);
-        return entrega;
+    listarTodos(filtros?: IFiltrosEntrega): Entrega[] {
+        const entregas = this.database.entregas;
+        if(!filtros) {
+            return entregas;
+        }
+        return this.filtraEntregas(entregas, filtros);
+
+    }
+
+    buscarPorId(idEntrega: number): Entrega | null {
+        return this.database.entregas.find((entrega) => entrega.id == idEntrega) ?? null;
     }
 
     criar(dadosEntrega: IEntrega): Entrega {
@@ -20,26 +34,34 @@ export class EntregaRepository implements IEntregaRepository {
         return nova;
     }
 
-    historico(idEntrega: number): Evento[] | undefined {
-        const entrega = this.porId(idEntrega);
-        return entrega?.historico;
+    atualizar(idEntrega: number, dados: Partial<IEntrega>) : Entrega {
+        const entrega = this.buscarPorId(idEntrega) as Entrega;
+        Object.assign(entrega, dados);
+        return entrega;
     }
 
-    listarEntregas(): Entrega[] {
-        return this.database.entregas;
+    private filtraEntregas(entregas: Entrega[], filtros: IFiltrosEntrega) {
+        return entregas.filter((entrega) => {
+            if (filtros.status && entrega.status !== filtros.status) {
+                return false;
+            }
+
+            if (filtros.origem && entrega.origem !== filtros.origem) {
+                return false;
+            }
+
+            if (filtros.destino && entrega.destino !== filtros.destino) {
+                return false;
+            }
+
+            if (filtros.motoristaId !== null && entrega.motoristaId != filtros.motoristaId) {
+                return false;
+            }
+            return true;
+        })
     }
 
-    porId(idEntrega: number): Entrega | undefined {
-        return this.database.entregas.find((entrega) => entrega.id === idEntrega);
-    }
 
-    porStatus(status: StatusEnum): Entrega[] {
-        return this.database.entregas.filter((entrega) => entrega.status === status);
-    }
-
-    novoRegistroHistorico(entrega: Entrega, evento: Evento) : void{
-        entrega.historico.push(evento);
-    }
 
 }
 
