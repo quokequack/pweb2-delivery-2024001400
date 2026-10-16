@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { StatusEnum } from "../database/StatusEnum.js";
+import { StatusEnum } from "../database/entregas/StatusEnum.js";
 import { EntregaError } from "../errors/EntregaError.js";
 import { EntregaService } from "../services/EntregaService.js";
 

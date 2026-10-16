@@ -2,7 +2,7 @@ import {MotoristaService} from "../services/MotoristaService.js";
 import {Request, Response} from "express";
 import {EntregaError} from "../errors/EntregaError.js";
 import {MotoristaError} from "../errors/MotoristaError.js";
-import {StatusEnum} from "../database/StatusEnum.js";
+import {StatusEnum} from "../database/entregas/StatusEnum.js";
 
 export class MotoristaController {
     constructor(private readonly motoristaService: MotoristaService) {}

@@ -1,12 +1,12 @@
-import {Entrega} from "../database/Entrega.js";
-import {StatusEnum} from "../database/StatusEnum.js";
+import {Entrega} from "../database/entregas/Entrega.js";
+import {StatusEnum} from "../database/entregas/StatusEnum.js";
 import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
-import {Evento} from "../database/Evento.js";
+import {Evento} from "../database/entregas/Evento.js";
 import {EntregaDTO} from "../dto/EntregaDTO.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
 import {EntregaError} from "../errors/EntregaError.js";
 import {IMotoristaRepository} from "../interfaces/IMotoristaRepository.js";
-import {StatusMotoristaEnum} from "../database/StatusMotoristaEnum.js";
+import {StatusMotoristaEnum} from "../database/motoristas/StatusMotoristaEnum.js";
 
 
 export class EntregaService {

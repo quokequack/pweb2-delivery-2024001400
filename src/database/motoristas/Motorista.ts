@@ -1,4 +1,4 @@
-import {IMotorista} from "../interfaces/IMotorista.js";
+import {IMotorista} from "../../interfaces/IMotorista.js";
 import {StatusMotoristaEnum} from "./StatusMotoristaEnum.js";
 
 export class Motorista implements IMotorista {

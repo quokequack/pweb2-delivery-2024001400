@@ -1,4 +1,4 @@
-import { Motorista } from "../database/Motorista.js";
+import { Motorista } from "../database/motoristas/Motorista.js";
 import { MotoristaDTO } from "../dto/MotoristaDTO.js";
 import {IMotoristaRepository} from "../interfaces/IMotoristaRepository.js";
 import {Database} from "../database/Database.js";

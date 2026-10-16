@@ -1,6 +1,6 @@
-import {Evento} from "../database/Evento.js";
+import {Evento} from "../database/entregas/Evento.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
-import {StatusEnum} from "../database/StatusEnum.js";
+import {StatusEnum} from "../database/entregas/StatusEnum.js";
 
 export class EntregaDTO implements IEntrega {
     descricao: string;

@@ -5,3 +5,8 @@ npm-debug.log*
 .DS_Store
 dist/
 .idea/
+/generated/prisma
+.agents/
+.claude/
+.windsurf/
+

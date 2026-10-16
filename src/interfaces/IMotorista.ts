@@ -1,4 +1,4 @@
-import {StatusMotoristaEnum} from "../database/StatusMotoristaEnum.js";
+import {StatusMotoristaEnum} from "../database/motoristas/StatusMotoristaEnum.js";
 
 export interface IMotorista {
     nome: string;

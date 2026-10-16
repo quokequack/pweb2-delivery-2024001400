@@ -1,4 +1,4 @@
-import {Motorista} from "../database/Motorista.js";
+import {Motorista} from "../database/motoristas/Motorista.js";
 import {IMotorista} from "./IMotorista.js";
 
 export interface IMotoristaRepository {

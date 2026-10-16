@@ -1,5 +1,5 @@
-import {Entrega} from "./Entrega.js";
-import {Motorista} from "./Motorista.js";
+import {Entrega} from "./entregas/Entrega.js";
+import {Motorista} from "./motoristas/Motorista.js";
 
 export class Database {
     entregas: Entrega[] = [];

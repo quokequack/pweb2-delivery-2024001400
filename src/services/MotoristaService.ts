@@ -3,8 +3,8 @@ import {MotoristaError} from "../errors/MotoristaError.js";
 import {MotoristaDTO} from "../dto/MotoristaDTO.js";
 import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
 import {EntregaError} from "../errors/EntregaError.js";
-import {StatusMotoristaEnum} from "../database/StatusMotoristaEnum.js";
-import {Entrega} from "../database/Entrega.js";
+import {StatusMotoristaEnum} from "../database/motoristas/StatusMotoristaEnum.js";
+import {Entrega} from "../database/entregas/Entrega.js";
 
 export class MotoristaService {
     constructor(private repository: IMotoristaRepository, private entregaRepository: IEntregaRepository){}
@@ -35,8 +35,6 @@ export class MotoristaService {
         }
 
         return this.entregaRepository.listarTodos({motoristaId: idMotorista});
-
-        // console.log(entregas);
 
     }
 }

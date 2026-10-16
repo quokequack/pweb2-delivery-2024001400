@@ -1,4 +1,4 @@
-import {Entrega} from "../database/Entrega.js";
+import {Entrega} from "../database/entregas/Entrega.js";
 import {IEntrega} from "./IEntrega.js";
 import {IFiltrosEntrega} from "../repositories/EntregaRepository.js";
 
@@ -8,7 +8,7 @@ export interface IEntregaRepository {
     /**
      * Lista todas as entregas, podendo aplicar filtros opcionais
      */
-    listarTodos(filtros?: IFiltrosEntrega) : Entrega[];
+    listarTodos(filtros?: IFiltrosEntrega) : Promise<Entrega[]>;
 
     /**
      * Busca a entrega que possui esse id
