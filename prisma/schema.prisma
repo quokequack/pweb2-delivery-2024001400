@@ -28,9 +28,17 @@ model Motorista {
    id Int @id @default(autoincrement())
    nome String
    cpf String @unique
-   placaVeiculo String?
+   placa_veiculo String?
    status StatusMotorista @default(ATIVO)
    entregas Entrega[]
+}
+
+model Evento {
+   id Int @id @default(autoincrement())
+   descricao String
+   data DateTime @default(now())
+   entrega_id Int
+   entrega Entrega @relation(fields: [entrega_id], references: [id])
 }
 
 model Entrega {
@@ -39,6 +47,7 @@ model Entrega {
    origem String
    destino String
    status StatusEntrega @default(CRIADA)
-   motorista_id Int
-   motorista Motorista @relation(fields: [motorista_id], references: [id])
+   motorista_id Int?
+   motorista Motorista? @relation(fields: [motorista_id], references: [id])
+   historico Evento[]
 }

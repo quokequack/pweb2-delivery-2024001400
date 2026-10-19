@@ -1,30 +1,32 @@
-import {Entrega} from "../database/entregas/Entrega.js";
-import {StatusEnum} from "../database/entregas/StatusEnum.js";
+import {Entregas} from "../database/entregas/Entrega.js";
+import {StatusEntrega} from "../../generated/prisma/enums.js";
 import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
-import {Evento} from "../database/entregas/Evento.js";
-import {EntregaDTO} from "../dto/EntregaDTO.js";
+import {Eventos} from "../database/entregas/Evento.js";
+import {CriacaoEntregaDTO} from "../dto/CriacaoEntregaDTO.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
 import {EntregaError} from "../errors/EntregaError.js";
 import {IMotoristaRepository} from "../interfaces/IMotoristaRepository.js";
 import {StatusMotoristaEnum} from "../database/motoristas/StatusMotoristaEnum.js";
+import {EdicaoEntregaDTO} from "../dto/EdicaoEntregaDTO.js";
 
 
 export class EntregaService {
     constructor(private repository: IEntregaRepository, private motoristaRepository: IMotoristaRepository) {}
 
 
-    novaEntrega(dados: {descricao: string, origem: string, destino: string, historico: Evento[]}){
+    async novaEntrega(dados: {descricao: string, origem: string, destino: string, historico: Eventos[]}){
         if (!dados || !dados.descricao?.trim() || !dados.origem?.trim() || !dados.destino?.trim()) {
             throw new EntregaError(400, "Descrição, origem e destino são obrigatórios");
         }
 
-        const dto = EntregaDTO.porObjeto(dados);
+        const dto = CriacaoEntregaDTO.porObjeto(dados);
         if(dto.origem.trim() === dto.destino.trim()){
             throw new EntregaError(400, "Origem e destino não podem ser iguais");
         }
 
-        const existeDuplicataAtiva = this.repository.listarTodos().some((entrega) =>
-            (entrega.status === StatusEnum.CRIADA || entrega.status === StatusEnum.EM_TRANSITO) &&
+        const existeDuplicataAtiva = await this.repository.listarTodos();
+        existeDuplicataAtiva.filter((entrega) =>
+            (entrega.status === StatusEntrega.CRIADA || entrega.status === StatusEntrega.EM_TRANSITO) &&
             entrega.descricao === dto.descricao &&
             entrega.origem === dto.origem &&
             entrega.destino === dto.destino,
@@ -37,48 +39,48 @@ export class EntregaService {
         return this.repository.criar(dto.paraEntrega());
     }
 
-    listarEntregas() : IEntrega[] {
-        return this.repository.listarTodos();
+    async listarEntregas() : Promise<IEntrega[]> {
+        return await this.repository.listarTodos();
     }
 
-    porId(idEntrega: number): IEntrega {
-        const entrega = this.repository.buscarPorId(idEntrega);
+    async porId(idEntrega: number): Promise<IEntrega> {
+        const entrega = await this.repository.buscarPorId(idEntrega);
         if(!entrega){
             throw new EntregaError(404, "Entrega não encontrada!");
         }
         return entrega;
     }
 
-    porStatus(statusBusca: StatusEnum) : Entrega[] {
-        return this.repository.listarTodos({status: statusBusca});
+    async porStatus(statusBusca: StatusEntrega) : Promise<Entregas[]> {
+        return await this.repository.listarTodos({status: statusBusca});
     }
 
-    buscaHistorico(idEntrega: number): Evento[] {
-        const entrega = this.porId(idEntrega);
+    async buscaHistorico(idEntrega: number): Promise<Eventos[]> {
+        const entrega = await this.porId(idEntrega);
         return entrega.historico ?? [];
 
     }
 
-    avancarEntrega(idEntrega: number): Entrega | undefined {
-        const entrega = this.porId(idEntrega);
+    async avancarEntrega(idEntrega: number): Promise<Entregas | undefined> {
+        const entrega = await this.porId(idEntrega);
 
         switch (entrega.status) {
-            case StatusEnum.CRIADA:
-                return this.atualizar(idEntrega, {status: StatusEnum.EM_TRANSITO});
-            case StatusEnum.EM_TRANSITO:
-                return this.atualizar(idEntrega, {status: StatusEnum.ENTREGUE});
+            case StatusEntrega.CRIADA:
+                return this.atualizar(idEntrega, {status: StatusEntrega.EM_TRANSITO, alteracao: 'Entrega em andamento!'});
+            case StatusEntrega.EM_TRANSITO:
+                return this.atualizar(idEntrega, {status: StatusEntrega.ENTREGUE, alteracao: 'Entrega finalizada!'});
             default:
                 throw new EntregaError(422, "A entrega não pode mais avançar");
         }
     }
 
-    cancelarEntrega(idEntrega: number): Entrega {
-        return this.atualizar(idEntrega, {status: StatusEnum.CANCELADA});
+    async cancelarEntrega(idEntrega: number): Promise<Entregas> {
+        return await this.atualizar(idEntrega, {status: StatusEntrega.CANCELADA, alteracao: 'Entrega cancelada!'});
     }
 
-    atribuirMotorista(idEntrega: number, idMotorista: number) : Entrega {
-        const motorista = this.motoristaRepository.buscarPorId(idMotorista);
-        const entrega = this.repository.buscarPorId(idEntrega);
+    async atribuirMotorista(idEntrega: number, idMotorista: number) : Promise<Entregas> {
+        const motorista = await this.motoristaRepository.buscarPorId(idMotorista);
+        const entrega = await this.repository.buscarPorId(idEntrega);
 
         if(!motorista){
             throw new EntregaError(404, "Motorista não encontrado!");
@@ -91,45 +93,33 @@ export class EntregaService {
             throw new EntregaError(404, "Entrega não encontrada!")
         }
 
-        if(entrega.status !== StatusEnum.CRIADA){
+        if(entrega.status !== StatusEntrega.CRIADA){
             throw new EntregaError(422, "Entrega com status inválido!");
         }
-        const evento = new Evento({data: new Date().toISOString(), descricao: `Motorista ${motorista.nome} atribuído!`})
 
-        return this.repository.atualizar(idEntrega, {motoristaId: idMotorista, historico: [...(entrega.historico ?? []), evento]})
+        return await this.atualizar(idEntrega, {motorista_id: idMotorista, alteracao: `Motorista ${motorista.nome} atribuído!`})
 
     }
 
-    private atualizar(idEntrega: number, dados: Partial<IEntrega>): Entrega {
-        const entrega = this.porId(idEntrega);
+    private async atualizar(idEntrega: number, dados: EdicaoEntregaDTO): Promise<Entregas> {
         if(dados.status){
             if(!this.validaStatus(idEntrega, dados.status)){
                 throw new EntregaError(422, "Transição de status inválida");
             }
-            const evento = this.adicionaEvento(dados.status);
-
-            dados.historico = [...(entrega.historico ?? []), evento];
         }
-        const entregaAtualizada = this.repository.atualizar(idEntrega, dados);
+        const entregaAtualizada = await this.repository.atualizar(idEntrega, dados);
         return entregaAtualizada;
     }
 
-    private validaStatus(idEntrega: number, novoStatus: StatusEnum){
-        const entrega = this.porId(idEntrega);
+    private async validaStatus(idEntrega: number, novoStatus: StatusEntrega){
+        const entrega = await this.porId(idEntrega);
 
-        if (novoStatus === StatusEnum.CANCELADA) {
-            return entrega.status === StatusEnum.CRIADA ||
-                entrega.status === StatusEnum.EM_TRANSITO;
+        if (novoStatus === StatusEntrega.CANCELADA) {
+            return entrega.status === StatusEntrega.CRIADA ||
+                entrega.status === StatusEntrega.EM_TRANSITO;
         }
 
-        return (entrega.status === StatusEnum.CRIADA && novoStatus === StatusEnum.EM_TRANSITO) ||
-            (entrega.status === StatusEnum.EM_TRANSITO && novoStatus === StatusEnum.ENTREGUE);
-    }
-
-    private adicionaEvento(novoStatus: StatusEnum) : Evento {
-        return new Evento({
-            data: new Date().toISOString(),
-            descricao: novoStatus
-        })
+        return (entrega.status === StatusEntrega.CRIADA && novoStatus === StatusEntrega.EM_TRANSITO) ||
+            (entrega.status === StatusEntrega.EM_TRANSITO && novoStatus === StatusEntrega.ENTREGUE);
     }
 }

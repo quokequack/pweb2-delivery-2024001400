@@ -1,15 +1,14 @@
 import {MotoristaService} from "../services/MotoristaService.js";
 import {Request, Response} from "express";
-import {EntregaError} from "../errors/EntregaError.js";
 import {MotoristaError} from "../errors/MotoristaError.js";
-import {StatusEnum} from "../database/entregas/StatusEnum.js";
+import {StatusEntrega} from "../../generated/prisma/enums.js";
 
 export class MotoristaController {
     constructor(private readonly motoristaService: MotoristaService) {}
 
     criar = async (req: Request, res: Response) => {
         try {
-            const motorista = this.motoristaService.criar(req.body);
+            const motorista = await this.motoristaService.criar(req.body);
             res.status(201).send(motorista);
         } catch (error) {
             this.responderErro(res, error);
@@ -20,10 +19,10 @@ export class MotoristaController {
         try {
             const idMotorista = req.params.id as unknown as number;
             if(req.query.status){
-                const status = req.query.status as StatusEnum;
+                const status = req.query.status as StatusEntrega;
                 res.status(200).json(this.motoristaService.entregasPorMotorista(idMotorista, status));
             }
-            const entregas  = this.motoristaService.entregasPorMotorista(idMotorista);
+            const entregas  = await this.motoristaService.entregasPorMotorista(idMotorista);
             res.status(200).json(entregas);
         } catch (error) {
             this.responderErro(res, error);

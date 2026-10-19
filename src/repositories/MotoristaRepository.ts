@@ -1,25 +1,40 @@
-import { Motorista } from "../database/motoristas/Motorista.js";
-import { MotoristaDTO } from "../dto/MotoristaDTO.js";
+import { Motoristas } from "../database/motoristas/Motorista.js";
 import {IMotoristaRepository} from "../interfaces/IMotoristaRepository.js";
-import {Database} from "../database/Database.js";
 import {IMotorista} from "../interfaces/IMotorista.js";
+import {prisma} from "../database/prisma.js";
 
 export class MotoristaRepository implements IMotoristaRepository {
-    constructor(private readonly database: Database) {
+    constructor() {
     }
-    listarTodos(): Motorista[] {
-        return this.database.motoristas;
+    async listarTodos(): Promise<Motoristas[]> {
+        return prisma.motorista.findMany();
     }
-    buscarPorId(id: number): Motorista | null {
-        return this.database.motoristas.find((motorista) => motorista.id == id) ?? null;
+    async buscarPorId(id: number): Promise<Motoristas | null> {
+        return prisma.motorista.findUnique({
+            where: {
+                id: id
+            }
+        });
     }
-    buscarPorCpf(cpf: string): Motorista | null {
-        return this.database.motoristas.find((motorista) => motorista.cpf === cpf) ?? null;
+
+    async buscarPorCpf(cpf: string): Promise<Motoristas | null> {
+        return prisma.motorista.findUnique({
+            where: {
+                cpf: cpf
+            }
+        });
+
     }
-    criar(dados: IMotorista): Motorista {
-        const motorista = new Motorista(this.database.proximoIdMotorista++, dados);
-        this.database.motoristas.push(motorista);
-        return motorista;
+
+    async criar(dados: IMotorista): Promise<Motoristas> {
+        return prisma.motorista.create({
+            data: {
+                nome: dados.nome,
+                cpf: dados.cpf,
+                placa_veiculo: dados.placaVeiculo,
+                status: dados.status,
+            }
+        })
     }
 
 

@@ -1,12 +1,12 @@
 import {IEntregaRepository} from "../interfaces/IEntregaRepository.js";
-import {Database} from "../database/Database.js";
 import {IEntrega} from "../interfaces/IEntrega.js";
-import {StatusEnum} from "../database/entregas/StatusEnum.js";
+import {StatusEntrega} from "../../generated/prisma/enums.js";
 import {Entregas} from "../database/entregas/Entrega.js";
 import {prisma} from "../database/prisma.js";
+import {EdicaoEntregaDTO} from "../dto/EdicaoEntregaDTO.js";
 
 export interface IFiltrosEntrega {
-    status?: StatusEnum;
+    status?: StatusEntrega;
     origem?: string;
     destino?: string;
     motoristaId?: number;
@@ -14,58 +14,100 @@ export interface IFiltrosEntrega {
 
 export class EntregaRepository implements IEntregaRepository {
 
-    constructor(private database: Database) {}
+    constructor() {}
 
     async listarTodos(filtros?: IFiltrosEntrega): Promise<Entregas[]> {
-        const entregas = await prisma.entrega.findMany();
-        if(!filtros) {
-            return entregas;
-        }
-        return this.filtraEntregas(entregas, filtros);
+        const entregas = await prisma.entrega.findMany({
+            where: {
+                ...(filtros?.status && {
+                    status: filtros.status
+                }),
+                ...(filtros?.origem && {
+                    origem: filtros.origem
+                }),
+                ...(filtros?.destino && {
+                    destino: filtros.destino
+                }),
+                ...(filtros?.motoristaId  != null && {
+                    motorista_id: filtros.motoristaId
+                }),
+            },
+            include: {
+                historico: true,
+            }
+        });
+        return entregas;
 
     }
 
-    buscarPorId(idEntrega: number): Entregas | null {
-        //TODO: atualizar pro prisma
+    async buscarPorId(idEntrega: number): Promise<Entregas|null> {
+        return prisma.entrega.findUnique({
+            where: {
+                id: idEntrega
+            },
+            include: {
+                historico: true,
+            }
+        });
     }
 
-    criar(dadosEntrega: IEntrega): Entregas {
-        const nova = new Entregas(this.database.proximoIdEntrega++, dadosEntrega);
-        this.database.entregas.push(nova);
+    async criar(dadosEntrega: IEntrega): Promise<Entregas> {
+        const nova = await prisma.entrega.create({
+            data: {
+                descricao: dadosEntrega.descricao,
+                origem: dadosEntrega.origem,
+                destino: dadosEntrega.destino,
+                status: dadosEntrega.status,
+
+                historico: {
+                    create: {
+                        descricao: "CRIADA",
+                        data: new Date()
+                    }
+                },
+            },
+            include: {
+                historico: true,
+            }
+        });
+
         return nova;
-        //TODO: atualizar pro prisma
     }
 
-    atualizar(idEntrega: number, dados: Partial<IEntrega>) : Entrega {
-        const entrega = this.buscarPorId(idEntrega) as Entrega;
-        Object.assign(entrega, dados);
-        return entrega;
-        //TODO: atualizar pro prisma
-    }
+    async atualizar(idEntrega: number, dados: EdicaoEntregaDTO) : Promise<Entregas> {
+        const entrega = await prisma.entrega.update({
+            where: {
+                id: idEntrega
+            },
 
-    private filtraEntregas(entregas: Entrega[], filtros: IFiltrosEntrega) {
-        return entregas.filter((entrega) => {
-            if (filtros.status && entrega.status !== filtros.status) {
-                return false;
-            }
+            data: {
+                ...(dados?.status && {
+                    status: dados.status,
+                }),
+                ...(dados?.origem && {
+                    origem: dados.origem,
+                }),
+                ...(dados?.destino && {
+                    destino: dados.destino,
+                }),
+                ...(dados?.motorista_id && {
+                    motorista_id: dados.motorista_id,
+                }),
 
-            if (filtros.origem && entrega.origem !== filtros.origem) {
-                return false;
+                historico: {
+                    create: {
+                        descricao: dados.alteracao,
+                        data: new Date()
+                    }
+                }
+            },
+            include: {
+                historico: true,
             }
-
-            if (filtros.destino && entrega.destino !== filtros.destino) {
-                return false;
-            }
-
-            if (filtros.motoristaId !== null && entrega.motoristaId != filtros.motoristaId) {
-                return false;
-            }
-            return true;
-            //TODO: atualizar pro prisma
         })
+
+        return entrega;
     }
-
-
 
 }
 
