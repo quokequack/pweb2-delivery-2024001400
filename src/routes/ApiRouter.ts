@@ -1,5 +1,4 @@
 import {Router} from "express";
-import {Database} from "../database/Database.js";
 import {EntregaRepository} from "../repositories/EntregaRepository.js";
 import {EntregaService} from "../services/EntregaService.js";
 import {EntregaController} from "../controllers/EntregaController.js";
@@ -14,18 +13,16 @@ export class ApiRouter {
 
     constructor() {
         this.router = Router();
-        const database = new Database();
-        const repository = new EntregaRepository(database);
+        const entregaRepository = new EntregaRepository();
 
-        const motoristaRepository = new MotoristaRepository(database);
-        const service = new EntregaService(repository, motoristaRepository);
-        const controller = new EntregaController(service);
-        const entregaRoutes = new EntregasRoute(controller);
+        const motoristaRepository = new MotoristaRepository();
+        const entregaService = new EntregaService(entregaRepository, motoristaRepository);
+        const entregaController = new EntregaController(entregaService);
+        const entregaRoutes = new EntregasRoute(entregaController);
 
-        const motoristaService = new MotoristaService(motoristaRepository, repository);
+        const motoristaService = new MotoristaService(motoristaRepository, entregaRepository);
         const motoristaController = new MotoristaController(motoristaService);
         const motoristaRoutes = new MotoristasRoute(motoristaController);
-
 
         this.router.use('/entregas', entregaRoutes.getRouter());
         this.router.use('/motoristas', motoristaRoutes.getRouter());

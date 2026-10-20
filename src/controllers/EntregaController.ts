@@ -1,41 +1,41 @@
 import { Request, Response } from "express";
-import { StatusEnum } from "../database/StatusEnum.js";
+import {StatusEntrega} from "../../generated/prisma/enums.js";
 import { EntregaError } from "../errors/EntregaError.js";
 import { EntregaService } from "../services/EntregaService.js";
 
 export class EntregaController {
     constructor(private service: EntregaService) {}
 
-    criar = (req: Request, res: Response) => {
+    criar = async (req: Request, res: Response) => {
         try {
-            const entrega = this.service.novaEntrega(req.body);
+            const entrega = await this.service.novaEntrega(req.body);
             return res.status(201).json(entrega);
         } catch (erro) {
             return this.responderErro(res, erro);
         }
     };
 
-    listar = (req: Request, res: Response) => {
+    listar = async (req: Request, res: Response) => {
         try {
             const status = req.query.status;
 
             if (status === undefined) {
-                return res.status(200).json(this.service.listarEntregas());
+                return res.status(200).json(await this.service.listarEntregas());
             }
 
-            if (typeof status !== "string" || !Object.values(StatusEnum).includes(status as StatusEnum)) {
+            if (typeof status !== "string" || !Object.values(StatusEntrega).includes(status as StatusEntrega)) {
                 return res.status(400).json({ erro: "Status inválido" });
             }
 
-            return res.status(200).json(this.service.porStatus(status as StatusEnum));
+            return res.status(200).json(await this.service.porStatus(status as StatusEntrega));
         } catch (erro) {
             return this.responderErro(res, erro);
         }
     };
 
-    buscarPorId = (req: Request, res: Response) => {
+    buscarPorId = async (req: Request, res: Response) => {
         try {
-            const entrega = this.service.porId(this.obterId(req));
+            const entrega = await this.service.porId(this.obterId(req));
 
             if (!entrega) {
                 return res.status(404).json({ erro: "Entrega não encontrada" });
@@ -47,9 +47,9 @@ export class EntregaController {
         }
     };
 
-    avancar = (req: Request, res: Response) => {
+    avancar = async (req: Request, res: Response) => {
         try {
-            const entrega = this.service.avancarEntrega(this.obterId(req));
+            const entrega = await this.service.avancarEntrega(this.obterId(req));
 
             if (!entrega) {
                 return res.status(404).json({ erro: "Entrega não encontrada" });
@@ -61,9 +61,9 @@ export class EntregaController {
         }
     };
 
-    cancelar = (req: Request, res: Response) => {
+    cancelar = async (req: Request, res: Response) => {
         try {
-            const entrega = this.service.cancelarEntrega(this.obterId(req));
+            const entrega = await this.service.cancelarEntrega(this.obterId(req));
 
             if (!entrega) {
                 return res.status(404).json({ erro: "Entrega não encontrada" });
@@ -75,9 +75,9 @@ export class EntregaController {
         }
     };
 
-    buscarHistorico = (req: Request, res: Response) => {
+    buscarHistorico = async (req: Request, res: Response) => {
         try {
-            const historico = this.service.buscaHistorico(this.obterId(req));
+            const historico = await this.service.buscaHistorico(this.obterId(req));
 
             if (!historico) {
                 return res.status(404).json({ erro: "Entrega não encontrada" });
@@ -109,11 +109,15 @@ export class EntregaController {
 
     atribuir = async (req: Request, res: Response) => {
         try {
-            const idEntrega = req.params.id as unknown as number;
-            const idMotorista = req.body.motoristaId as unknown as number;
+            const idEntrega = this.obterId(req);
+            const idMotorista = Number(req.body?.motoristaId);
 
-            const entrega = this.service.atribuirMotorista(idEntrega, idMotorista);
-            res.status(200).json(entrega);
+            if (!Number.isInteger(idMotorista) || idMotorista <= 0) {
+                throw new EntregaError(400, "Identificador do motorista inválido");
+            }
+
+            const entrega = await this.service.atribuirMotorista(idEntrega, idMotorista);
+            return res.status(200).json({ ...entrega, motoristaId: entrega.motorista_id });
         } catch(error){
             return this.responderErro(res, error);
         }

@@ -1,13 +1,14 @@
-import {StatusEnum} from "../database/StatusEnum.js";
-import {Evento} from "../database/Evento.js";
+import {StatusEntrega} from "../../generated/prisma/enums.js";
+import {Eventos} from "../database/entregas/Evento.js";
 
 
 export interface IEntrega {
     descricao: string,
     origem: string,
     destino: string,
-    status: StatusEnum,
-    motoristaId: number | null,
-    historico: Evento[]
+    status: StatusEntrega,
+    motorista_id: number | null,
+    historico?: Eventos[]
+    alteracao?: string
 
 }

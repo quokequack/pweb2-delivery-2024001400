@@ -1,5 +1,5 @@
 import {IMotorista} from "../interfaces/IMotorista.js";
-import {StatusMotoristaEnum} from "../database/StatusMotoristaEnum.js";
+import {StatusMotoristaEnum} from "../database/motoristas/StatusMotoristaEnum.js";
 
 export class MotoristaDTO implements IMotorista {
     cpf: string;

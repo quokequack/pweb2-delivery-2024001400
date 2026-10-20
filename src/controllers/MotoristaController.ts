@@ -1,15 +1,14 @@
 import {MotoristaService} from "../services/MotoristaService.js";
 import {Request, Response} from "express";
-import {EntregaError} from "../errors/EntregaError.js";
 import {MotoristaError} from "../errors/MotoristaError.js";
-import {StatusEnum} from "../database/StatusEnum.js";
+import {StatusEntrega} from "../../generated/prisma/enums.js";
 
 export class MotoristaController {
     constructor(private readonly motoristaService: MotoristaService) {}
 
     criar = async (req: Request, res: Response) => {
         try {
-            const motorista = this.motoristaService.criar(req.body);
+            const motorista = await this.motoristaService.criar(req.body);
             res.status(201).send(motorista);
         } catch (error) {
             this.responderErro(res, error);
@@ -18,15 +17,27 @@ export class MotoristaController {
 
     entregasPorMotorista = async (req: Request, res: Response) => {
         try {
-            const idMotorista = req.params.id as unknown as number;
-            if(req.query.status){
-                const status = req.query.status as StatusEnum;
-                res.status(200).json(this.motoristaService.entregasPorMotorista(idMotorista, status));
+            const idMotorista = Number(req.params.id);
+            if (!Number.isInteger(idMotorista) || idMotorista <= 0) {
+                throw new MotoristaError(400, "Identificador do motorista inválido");
             }
-            const entregas  = this.motoristaService.entregasPorMotorista(idMotorista);
-            res.status(200).json(entregas);
+
+            const status = req.query.status;
+            if (status !== undefined &&
+                (typeof status !== "string" || !Object.values(StatusEntrega).includes(status as StatusEntrega))) {
+                throw new MotoristaError(400, "Status inválido");
+            }
+
+            const entregas = await this.motoristaService.entregasPorMotorista(
+                idMotorista,
+                status as StatusEntrega | undefined,
+            );
+            return res.status(200).json(entregas.map((entrega) => ({
+                ...entrega,
+                motoristaId: entrega.motorista_id,
+            })));
         } catch (error) {
-            this.responderErro(res, error);
+            return this.responderErro(res, error);
         }
     }
 
