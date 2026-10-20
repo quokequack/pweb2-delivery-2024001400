@@ -24,8 +24,8 @@ export class EntregaService {
             throw new EntregaError(400, "Origem e destino não podem ser iguais");
         }
 
-        const existeDuplicataAtiva = await this.repository.listarTodos();
-        existeDuplicataAtiva.filter((entrega) =>
+        const entregas = await this.repository.listarTodos();
+        const existeDuplicataAtiva = entregas.some((entrega) =>
             (entrega.status === StatusEntrega.CRIADA || entrega.status === StatusEntrega.EM_TRANSITO) &&
             entrega.descricao === dto.descricao &&
             entrega.origem === dto.origem &&
@@ -103,7 +103,7 @@ export class EntregaService {
 
     private async atualizar(idEntrega: number, dados: EdicaoEntregaDTO): Promise<Entregas> {
         if(dados.status){
-            if(!this.validaStatus(idEntrega, dados.status)){
+            if(!await this.validaStatus(idEntrega, dados.status)){
                 throw new EntregaError(422, "Transição de status inválida");
             }
         }
@@ -112,11 +112,10 @@ export class EntregaService {
     }
 
     private async validaStatus(idEntrega: number, novoStatus: StatusEntrega){
-        const entrega = await this.porId(idEntrega);
+        const entrega = await this.repository.buscarPorId(idEntrega);
 
         if (novoStatus === StatusEntrega.CANCELADA) {
-            return entrega.status === StatusEntrega.CRIADA ||
-                entrega.status === StatusEntrega.EM_TRANSITO;
+            return entrega.status === StatusEntrega.CRIADA || entrega.status === StatusEntrega.EM_TRANSITO;
         }
 
         return (entrega.status === StatusEntrega.CRIADA && novoStatus === StatusEntrega.EM_TRANSITO) ||

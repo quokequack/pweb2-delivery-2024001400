@@ -5,10 +5,11 @@
     "moduleResolution": "NodeNext",
     "rootDir": ".",
     "outDir": "dist",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": false
   },
   "include": ["src/**/*.ts"]
 }

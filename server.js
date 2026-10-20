@@ -6,7 +6,7 @@
 // Comece implementando as camadas em src/ (veja o README) e vá rodando o
 // autograder: `npm run check` (com o servidor no ar) ou pela aba Actions no push.
 import express from 'express';
-import { ApiRouter } from "./dist/routes/ApiRouter.js";
+import { ApiRouter } from "./dist/src/routes/ApiRouter.js";
 
 const app = express();
 app.use(express.json());

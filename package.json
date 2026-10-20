@@ -4,6 +4,7 @@
   "description": "Delivery Tracker — Exercício do Cap. 4 (arquitetura em camadas + Repository/DI).",
   "type": "module",
   "scripts": {
+    "prebuild": "prisma generate --config prisma7.config.ts",
     "build": "tsc",
     "start": "npm run build && node server.js",
     "dev": "npm run build && node --watch server.js",

@@ -24,7 +24,6 @@ export class ApiRouter {
         const motoristaController = new MotoristaController(motoristaService);
         const motoristaRoutes = new MotoristasRoute(motoristaController);
 
-
         this.router.use('/entregas', entregaRoutes.getRouter());
         this.router.use('/motoristas', motoristaRoutes.getRouter());
     }

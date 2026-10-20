@@ -8,9 +8,11 @@
 
 1. Clique em **"Use this template"** e crie **`pweb2-delivery-<matricula>`** (ex.: `pweb2-delivery-20231012345`).
    Este é o repositório que você usará o **semestre inteiro** (evolui a cada capítulo).
-2. Clone, instale e rode:
+2. Clone, instale, configure o SQLite e rode:
    ```bash
    npm install
+   cp .env.example .env
+   npx prisma migrate deploy --config prisma7.config.ts
    npm start                                        # http://localhost:3000
    # em outro terminal — autograder:
    npm run check                                    # = BASE_URL=http://localhost:3000 node autograder/check.mjs
@@ -25,7 +27,7 @@ src/
 ├── controllers/   # traduz HTTP ↔ service (sem regra de negócio)
 ├── services/      # TODA a regra de negócio
 ├── repositories/  # só acesso a dados
-├── database/      # persistência SIMULADA em memória (sem banco real, sem ORM)
+├── database/      # conexão com SQLite via Prisma
 ├── routes/        # composição das dependências (injeção) + monta em /api
 └── utils/
 ```

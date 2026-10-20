@@ -14,7 +14,7 @@ export class MotoristaService {
         }
 
         const dto = MotoristaDTO.porObjeto(dados);
-        const existeMotoristaCPF = await this.porCpf(dados.cpf);
+        const existeMotoristaCPF = await this.repository.buscarPorCpf(dados.cpf);
 
         if (existeMotoristaCPF !== null) {
             throw new MotoristaError(409, "Já existe um motorista ativo com os mesmos dados!");
@@ -40,7 +40,10 @@ export class MotoristaService {
     }
 
     async entregasPorMotorista(idMotorista: number, status?: StatusEntrega) {
-        const motorista = await this.porId(idMotorista);
+        const motorista = await this.repository.buscarPorId(idMotorista);
+        if (!motorista) {
+            throw new MotoristaError(404, "Motorista não encontrado!");
+        }
         if(motorista.status === StatusMotoristaEnum.INATIVO){
             throw new MotoristaError(422, "Motorista inativo!");
         }
@@ -49,7 +52,7 @@ export class MotoristaService {
             return await this.entregaRepository.listarTodos({motoristaId: idMotorista, status: status})
         }
 
-        return this.entregaRepository.listarTodos({motoristaId: idMotorista});
+        return await this.entregaRepository.listarTodos({motoristaId: idMotorista});
 
     }
 }

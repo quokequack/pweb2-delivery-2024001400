@@ -109,11 +109,15 @@ export class EntregaController {
 
     atribuir = async (req: Request, res: Response) => {
         try {
-            const idEntrega = req.params.id as unknown as number;
-            const idMotorista = req.body.motoristaId as unknown as number;
+            const idEntrega = this.obterId(req);
+            const idMotorista = Number(req.body?.motoristaId);
+
+            if (!Number.isInteger(idMotorista) || idMotorista <= 0) {
+                throw new EntregaError(400, "Identificador do motorista inválido");
+            }
 
             const entrega = await this.service.atribuirMotorista(idEntrega, idMotorista);
-            res.status(200).json(entrega);
+            return res.status(200).json({ ...entrega, motoristaId: entrega.motorista_id });
         } catch(error){
             return this.responderErro(res, error);
         }
