@@ -4,11 +4,14 @@
   "description": "Delivery Tracker — Exercício do Cap. 4 (arquitetura em camadas + Repository/DI).",
   "type": "module",
   "scripts": {
-    "prebuild": "prisma generate --config prisma7.config.ts",
     "build": "tsc",
-    "start": "npm run build && node server.js",
+    "start": "node server.js",
     "dev": "npm run build && node --watch server.js",
-    "check": "node autograder/check.mjs"
+    "check": "node autograder/check.mjs",
+    "postinstall": "prisma generate --config prisma7.config.ts && prisma migrate deploy --config prisma7.config.ts && npm run build",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",
