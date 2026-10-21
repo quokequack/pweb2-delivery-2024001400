@@ -4,7 +4,7 @@ import { isAbsolute, resolve } from "node:path";
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 
-const configuredUrl = process.env.DATABASE_URL;
+const configuredUrl = process.env.DATABASE_URL ?? "file:./dev.db";
 if (!configuredUrl?.startsWith("file:")) {
     throw new Error("DATABASE_URL deve apontar para um arquivo SQLite (file:...)");
 }
