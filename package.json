@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node server.js",
+    "start": "node server.js",
     "dev": "npm run build && node --watch server.js",
     "check": "node autograder/check.mjs",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --config prisma7.config.ts && prisma migrate deploy --config prisma7.config.ts && npm run build",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio"
