@@ -1,0 +1,37 @@
+
+<h1>Nova Entrega</h1>
+
+<% if (erros.length) { %>
+    <ul>
+        <% erros.forEach(erro => { %>
+            <li><%= erro %></li>
+        <% }) %>
+    </ul>
+<% } %>
+
+<form method="POST" action="/entregas">
+
+    <label for="descricao">Descrição</label>
+    <input
+            id="descricao"
+            name="descricao"
+            value="<%= dados.descricao %>"
+    >
+
+    <label for="origem">Origem</label>
+    <input
+            id="origem"
+            name="origem"
+            value="<%= dados.origem %>"
+    >
+
+    <label for="destino">Destino</label>
+    <input
+            id="destino"
+            name="destino"
+            value="<%= dados.destino %>"
+    >
+
+    <button type="submit">Criar Entrega</button>
+
+</form>

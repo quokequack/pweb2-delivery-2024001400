@@ -1,0 +1,79 @@
+
+<h1>Entrega #<%= entrega.id %></h1>
+
+<p>Descrição: <%= entrega.descricao %></p>
+<p>Origem: <%= entrega.origem %></p>
+<p>Destino: <%= entrega.destino %></p>
+
+<p>
+    Status:
+    <span class="badge"><%= entrega.status %></span>
+</p>
+
+<% if (['CRIADA', 'EM_TRANSITO'].includes(entrega.status)) { %>
+
+    <form method="POST"
+          action="/entregas/<%= entrega.id %>/avancar?_method=PATCH">
+        <button type="submit">Avançar status</button>
+    </form>
+
+    <form method="POST"
+          action="/entregas/<%= entrega.id %>/cancelar?_method=PATCH">
+        <button type="submit">Cancelar entrega</button>
+    </form>
+
+<% } %>
+
+<h2>Histórico</h2>
+
+<ul>
+    <% historico.forEach(evento => { %>
+        <li>
+            <%= evento.descricao %> —
+            <%= new Date(evento.data).toLocaleString('pt-BR') %>
+        </li>
+    <% }) %>
+</ul>
+
+
+<% if (entrega.status === 'CRIADA') { %>
+    <section>
+        <h2>Atribuir motorista</h2>
+
+        <form
+                method="POST"
+                action="/entregas/<%= entrega.id %>/atribuir?_method=PATCH"
+        >
+            <label for="motoristaId">Motorista:</label>
+
+            <select
+                    id="motoristaId"
+                    name="motoristaId"
+                    required
+            >
+                <option value="">
+                    Selecione um motorista
+                </option>
+
+                <% motoristas
+                        .filter(m => m.status === 'ATIVO')
+                .forEach(motorista => { %>
+
+                    <option
+                            value="<%= motorista.id %>"
+                            <%= entrega.motorista_id === motorista.id
+                                    ? 'selected'
+                                    : '' %>
+                    >
+                        <%= motorista.nome %>
+                    </option>
+
+                <% }) %>
+            </select>
+
+            <button type="submit">
+                Atribuir motorista
+            </button>
+        </form>
+    </section>
+<% } %>

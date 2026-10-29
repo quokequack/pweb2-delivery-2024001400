@@ -8,20 +8,34 @@ import {MotoristaService} from "../services/MotoristaService.js";
 import {MotoristaController} from "../controllers/MotoristaController.js";
 import {MotoristasRoute} from "./MotoristasRoute.js";
 
-export class ApiRouter {
+export class WebRouter {
     private router: Router;
 
     constructor() {
         this.router = Router();
         const entregaRepository = new EntregaRepository();
-
         const motoristaRepository = new MotoristaRepository();
-        const entregaService = new EntregaService(entregaRepository, motoristaRepository);
-        const entregaController = new EntregaController(entregaService);
-        const entregaRoutes = new EntregasRoute(entregaController);
 
-        const motoristaService = new MotoristaService(motoristaRepository, entregaRepository);
-        const motoristaController = new MotoristaController(motoristaService);
+        const entregaService = new EntregaService(
+            entregaRepository,
+            motoristaRepository
+        );
+
+        const motoristaService = new MotoristaService(
+            motoristaRepository,
+            entregaRepository
+        );
+
+        const entregaController = new EntregaController(
+            entregaService,
+            motoristaService
+        );
+
+        const motoristaController = new MotoristaController(
+            motoristaService
+        );
+
+        const entregaRoutes = new EntregasRoute(entregaController);
         const motoristaRoutes = new MotoristasRoute(motoristaController);
 
         this.router.use('/entregas', entregaRoutes.getRouter());

@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node server.js",
     "dev": "npm run build && node --watch server.js",
+    "check:web": "node scripts/check-web-flows.mjs",
     "check": "node autograder/check.mjs",
     "postinstall": "prisma generate --config prisma7.config.ts && prisma migrate deploy --config prisma7.config.ts && npm run build",
     "db:migrate": "prisma migrate dev",
@@ -16,12 +17,24 @@
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "connect-flash": "^0.1.1",
     "dotenv": "^18.0.8",
-    "express": "^4.22.3"
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "method-override": "^3.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
-    "@types/express": "^5.0.6",
+    "@types/connect-flash": "^0.0.40",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^4.17.25",
+    "@types/express-ejs-layouts": "^2.5.4",
+    "@types/express-serve-static-core": "^4.19.9",
+    "@types/express-session": "^1.19.0",
+    "@types/method-override": "^3.0.0",
     "@types/node": "^26.6.5",
     "prisma": "^7.10.1",
     "typescript": "^7.0.2"

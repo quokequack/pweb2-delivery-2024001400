@@ -39,6 +39,10 @@ export class MotoristaService {
         return motorista;
     }
 
+    async motoristas() {
+        return await this.repository.listarTodos();
+    }
+
     async entregasPorMotorista(idMotorista: number, status?: StatusEntrega) {
         const motorista = await this.repository.buscarPorId(idMotorista);
         if (!motorista) {
