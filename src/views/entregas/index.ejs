@@ -1,0 +1,60 @@
+
+<h1>Entregas</h1>
+
+<a href="/entregas/nova">Nova Entrega</a>
+
+<form method="GET" action="/entregas">
+    <label for="status">Filtrar por status:</label>
+
+    <select name="status" id="status">
+        <option value="">Todos</option>
+
+        <% ['CRIADA', 'EM_TRANSITO', 'ENTREGUE',
+            'CANCELADA'].forEach(status => { %>
+
+            <option value="<%= status %>"
+                    <%= statusSelecionado === status ? 'selected' : '' %>>
+                <%= status %>
+            </option>
+
+        <% }) %>
+    </select>
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Descrição</th>
+        <th>Origem</th>
+        <th>Destino</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <% entregas.forEach(entrega => { %>
+        <tr>
+            <td><%= entrega.id %></td>
+            <td><%= entrega.descricao %></td>
+            <td><%= entrega.origem %></td>
+            <td><%= entrega.destino %></td>
+
+            <td>
+          <span class="badge">
+            <%= entrega.status %>
+          </span>
+            </td>
+
+            <td>
+                <a href="/entregas/<%= entrega.id %>">
+                    Detalhes
+                </a>
+            </td>
+        </tr>
+    <% }) %>
+    </tbody>
+</table>
